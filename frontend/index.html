@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LVME - Couple Memory</title>
+    <link rel="stylesheet" href="styles.css?v=2">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    
+    <!-- Beautiful Ambient Background -->
+    <div class="ambient-bg">
+        <div class="glow glow-1"></div>
+        <div class="glow glow-2"></div>
+        <div class="glow glow-3"></div>
+    </div>
+    
+    <!-- Welcome/Landing Screen -->
+    <div id="welcome-screen" class="screen active whitish-bg">
+        <div class="login-card">
+            <h1 class="brand-title">LVME</h1>
+            <p class="subtitle">Enter your own universe.</p>
+            
+            <div class="input-group" style="flex-direction: row; gap: 20px; justify-content: center; margin-bottom: 0;">
+                <button id="go-login-btn" class="action-button">Log In</button>
+                <button id="go-signup-btn" class="action-button secondary">Create Account</button>
+            </div>
+        </div>
+        <!-- Decorative floating elements -->
+        <div class="floating-shape shape-1"></div>
+        <div class="floating-shape shape-2"></div>
+    </div>
+
+    <!-- Sign Up Screen -->
+    <div id="signup-screen" class="screen whitish-bg">
+        <div class="login-card">
+            <h2 class="universe-title" style="margin-bottom: 20px;">Create Account</h2>
+            <p class="subtitle">Choose a unique username to bind to your face identity.</p>
+            
+            <div class="input-group">
+                <input type="text" id="new-username" placeholder="Username (letters, numbers, special only)" autocomplete="off">
+            </div>
+            
+            <button id="start-signup-face-btn" class="action-button primary-glow">Scan Face to Register</button>
+            <p id="signup-error" class="status-text" style="color: #ff3366; display: none; margin-top: 20px;"></p>
+            <button id="back-to-welcome-btn1" class="action-button secondary" style="margin-top: 20px; padding: 10px 20px; font-size: 1rem;">Back</button>
+        </div>
+        <!-- Decorative floating elements -->
+        <div class="floating-shape shape-1"></div>
+        <div class="floating-shape shape-2"></div>
+    </div>
+
+    <!-- FaceCam Liveness Security Portal -->
+    <div id="liveness-screen" class="screen whitish-bg">
+        <div class="liveness-card">
+            <h2 class="universe-title" style="font-size: 2rem;">Secure Entry</h2>
+            <p id="liveness-instruction" class="subtitle">Look directly into the camera to initialize.</p>
+            
+            <div class="video-container liveness-cam-wrapper">
+                <video id="liveness-webcam" autoplay playsinline muted></video>
+                <div id="liveness-overlay" class="liveness-overlay"></div>
+            </div>
+            
+            <div class="progress-bar-container">
+                <div id="liveness-progress" class="progress-bar"></div>
+            </div>
+            <p id="liveness-status" class="status-text">Waiting for face...</p>
+            <button id="back-to-welcome-btn2" class="action-button secondary" style="display: none; margin-top: 20px; padding: 10px 20px; font-size: 1rem;">Go Back</button>
+        </div>
+        <canvas id="liveness-canvas" style="display: none;"></canvas>
+    </div>
+
+    <!-- Partner Binding Screen -->
+    <div id="partner-setup-screen" class="screen whitish-bg">
+        <div class="login-card">
+            <h1 class="universe-title">Link Your Partner</h1>
+            <p class="subtitle" style="margin-bottom: 20px;">LVME is a closed ecosystem. You can only bind to ONE partner. This connection is permanent.</p>
+            <p class="status-text" id="loggedin-username-display" style="margin-bottom: 20px; font-weight: 600; color: var(--accent-primary);"></p>
+            
+            <div class="input-group">
+                <input type="text" id="partner-username-input" placeholder="Partner's LVME Handle" autocomplete="off">
+            </div>
+            
+            <button id="bind-partner-btn" class="action-button primary-glow">Connect Securely</button>
+            <p id="partner-bind-error" class="status-text" style="color: #ff3366; display: none; margin-top: 20px;"></p>
+        </div>
+        
+        <div class="floating-shape shape-1"></div>
+        <div class="floating-shape shape-2"></div>
+    </div>
+
+    <!-- Dashboard Screen -->
+    <div id="dashboard-screen" class="screen whitish-bg">
+        <div class="login-card">
+            <h1 class="universe-title">Welcome Home</h1>
+            <p class="subtitle" id="dashboard-subtitle">What would you like to do?</p>
+            
+            <div id="nostalgia-widget" class="nostalgia-card" style="display:none;">
+                <div class="nostalgia-header">
+                    <span id="nostalgia-time">🕰️ On this day last year...</span>
+                </div>
+                <div class="nostalgia-content">
+                    <img id="nostalgia-img" class="nostalgia-media" src="" alt="Memory">
+                    <p id="nostalgia-caption" class="nostalgia-caption"></p>
+                </div>
+            </div>
+            
+            <div class="pfp-upload-group">
+                <div class="pfp-preview" id="my-pfp-preview" title="Change Profile Picture (DP)">
+                    <img id="my-pfp-img" src="" style="display:none;">
+                    <span id="my-pfp-icon">👤</span>
+                    <div class="edit-badge">✏️</div>
+                </div>
+                <input type="file" id="pfp-upload-input" style="display:none;" accept="image/*">
+                <span style="font-size: 0.9rem; color: var(--text-muted);">Tap to change DP</span>
+            </div>
+            
+            <div class="input-group">
+                <button id="send-heartbeat-btn" class="action-button primary-glow" style="margin-bottom: 15px; width: 100%; background: linear-gradient(135deg, #ff1a53, #990033);">Send Heartbeat 💓</button>
+                <button id="go-to-chat-btn" class="action-button primary-glow" style="margin-bottom: 15px; width: 100%;">Open Chat Hub</button>
+                <button id="go-to-memories-btn" class="action-button secondary" style="width: 100%;">View Shared Memories</button>
+            </div>
+            <button onclick="location.reload()" class="action-button" style="background: transparent; color: #aaa; box-shadow: none; font-size: 0.9rem; margin-top: 10px;">Log Out</button>
+        </div>
+        
+        <div class="floating-shape shape-1"></div>
+        <div class="floating-shape shape-2"></div>
+    </div>
+
+    <!-- Private Chat Hub Screen -->
+    <div id="chat-hub-screen" class="screen chat-layout">
+        <!-- Chat Header -->
+        <header class="chat-header">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <button class="icon-btn" id="back-to-dash-btn" title="Back to Dashboard" style="font-size: 1.6rem; color: var(--accent-primary); background: transparent; padding-bottom: 3px;">←</button>
+                <div class="chat-header-info" style="padding: 0;">
+                    <div class="partner-avatar" id="chat-partner-avatar">👤</div>
+                    <div class="partner-details">
+                        <h3 id="chat-partner-name">Partner</h3>
+                        <p class="online-status">Online</p>
+                    </div>
+                </div>
+            </div>
+            <div class="chat-header-actions">
+                <button class="icon-btn" id="voice-call-btn" title="Voice Call">📞</button>
+                <button class="icon-btn" id="video-call-btn" title="Video Call">🎥</button>
+            </div>
+        </header>
+
+        <!-- Chat Messages Area -->
+        <div class="chat-messages" id="chat-messages-container">
+            <div class="chat-date-divider">Today</div>
+            <!-- Messages inject here -->
+        </div>
+
+        <!-- Hidden Data Inputs -->
+        <input type="file" id="chat-attachment-input" style="display: none;" accept="image/*,.pdf,.ppt,.pptx">
+
+        <!-- Chat Input Area -->
+        <footer class="chat-input-area">
+            <button class="icon-btn action-icon" id="attach-file-btn" title="Attach Image or Document">📎</button>
+            <button class="icon-btn action-icon" id="capsule-btn" title="Send Time Capsule">⏳</button>
+            <button class="icon-btn action-icon" id="scratch-btn" title="Send Scratch-off Secret">🖌️</button>
+            <input type="text" id="chat-text-input" placeholder="Whisper something..." autocomplete="off">
+            <button class="icon-btn action-icon" id="voice-note-btn" title="Voice Note">🎤</button>
+            <button class="icon-btn send-icon" id="send-msg-btn" title="Send" style="display: none;">🚀</button>
+        </footer>
+    </div>
+
+    <!-- Video Call Screen -->
+    <div id="video-call-screen" class="screen">
+        <div class="main-video-wrapper">
+            <video id="remote-webcam" autoplay playsinline style="width: 100%; height: 100%; object-fit: cover;"></video>
+            <!-- Local camera becomes picture-in-picture -->
+            <video id="webcam" autoplay playsinline style="position: absolute; bottom: 120px; right: 20px; width: 120px; height: 160px; border-radius: 12px; border: 2px solid white; object-fit: cover; box-shadow: 0 4px 15px rgba(0,0,0,0.5); z-index: 10;"></video>
+        </div>
+
+        <div class="call-controls" style="z-index: 15; position: absolute; bottom: 30px; width: 100%; display: flex; justify-content: center;">
+            <button id="end-call-btn" class="action-button">Let me drown in your love</button>
+        </div>
+    </div>
+
+    <!-- Voice Call Screen -->
+    <div id="voice-call-screen" class="screen whitish-bg">
+        <div class="login-card" style="display: flex; flex-direction: column; align-items: center;">
+            <div class="partner-avatar" style="width: 120px; height: 120px; font-size: 3rem; margin-bottom: 20px;" id="voice-call-avatar">👤</div>
+            <h2 class="universe-title" id="voice-call-title" style="margin-bottom: 10px;">Calling...</h2>
+            <p class="subtitle" id="voice-call-timer" style="font-size: 2rem; color: var(--accent-primary); font-weight: 600;">00:00</p>
+            
+            <button id="end-voice-call-btn" class="action-button" style="background:#ff3366; width: 100%; border-radius: 50px; margin-top: 20px;">End Call</button>
+        </div>
+    </div>
+
+    <!-- Memories Gallery Screen (Hidden Initially) -->
+    <div id="memories-screen" class="screen">
+        <header class="gallery-title">
+            <h2>The beautifully unscripted moments...</h2>
+            <p>Here's what we captured while you were lost in conversation.</p>
+        </header>
+        
+        <div id="gallery" class="gallery-grid">
+            <div class="empty-state" id="empty-state">
+                <p>No memories were captured this time.</p>
+            </div>
+        </div>
+
+        <div class="post-call-controls" style="display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin-bottom: 40px; margin-top: 20px;">
+            <button id="generate-trailer-btn" class="action-button" style="background: linear-gradient(135deg, #8a2387, #e94057, #f27121);">Generate Love Trailer ✨</button>
+            <button id="back-to-chat-btn" class="action-button primary-glow">Return to Chat</button>
+            <button id="back-to-dashboard-btn" class="action-button secondary">Dashboard</button>
+        </div>
+    </div>
+    
+    <!-- Incoming Call Overlay -->
+    <div id="incoming-call-overlay" class="screen" style="background: rgba(10,10,15,0.9); z-index: 9999; display: none; align-items: center; justify-content: center;">
+        <div class="login-card" style="text-align: center;">
+            <div class="partner-avatar" style="width: 100px; height: 100px; font-size: 3rem; margin: 0 auto 20px; animation: pulse 1.5s infinite;">👤</div>
+            <h2 class="universe-title" id="incoming-call-text">Incoming Call...</h2>
+            <div style="display: flex; gap: 15px; margin-top: 30px;">
+                <button id="answer-call-btn" class="action-button primary-glow" style="background: #00cc66;">Answer</button>
+                <button id="reject-call-btn" class="action-button" style="background: #ff3366;">Decline</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Canvas used internally to extract frames (hidden) -->
+    <canvas id="capture-canvas" style="display: none;"></canvas>
+
+    <div id="massive-heartbeat-layer">💓</div>
+
+    <script src="app.js?v=4"></script>
+</body>
+</html>

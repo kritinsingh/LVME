@@ -1,0 +1,16 @@
+{
+  "appId": "com.lvme.app",
+  "appName": "LVME",
+  "webDir": "www",
+  "bundledWebRuntime": false,
+  "plugins": {
+    "Camera": {
+      "ios": {
+        "cameraUsageDescription": "LVME requires camera access for private video calls and face authentication."
+      },
+      "android": {
+        "cameraUsageDescription": "LVME requires camera access for private video calls and face authentication."
+      }
+    }
+  }
+}

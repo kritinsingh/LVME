@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+python-multipart
+opencv-python
+mediapipe
+numpy
+sqlalchemy
+websockets
+moviepy==1.0.3
+pillow

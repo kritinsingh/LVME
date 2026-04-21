@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: lvme-ai-backend
+    env: docker
+    dockerfilePath: ./Dockerfile
+    region: ohio
+    plan: free
+    autoDeploy: false
+    envVars:
+      - key: PORT
+        value: 8000

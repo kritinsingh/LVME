@@ -1,0 +1,13 @@
+# Dependencies
+node_modules/
+ai_backend/venv/
+ai_backend/__pycache__/
+
+# Build outputs
+frontend/dist-electron/
+frontend/android/
+*.exe
+
+# Environment
+.env
+lvme_data.db
