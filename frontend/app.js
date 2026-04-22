@@ -1,14 +1,13 @@
-// Dynamic Configuration
-const isHosted = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1' && window.location.hostname !== '';
-const BACKEND_BASE = isHosted ? window.location.origin : `http://127.0.0.1:8000`;
-const WS_BASE = isHosted ? window.location.origin.replace('http', 'ws') : `ws://127.0.0.1:8000`;
+// Production Configuration
+const CLOUD_URL = "https://lvme-1.onrender.com";
+const WS_URL_BASE = "wss://lvme-1.onrender.com";
 
-const API_URL = `${BACKEND_BASE}/analyze-frame/`;
-const LIVENESS_URL = `${BACKEND_BASE}/liveness-check/`;
-const AUTH_URL = `${BACKEND_BASE}/auth/`;
-const BIND_URL = `${BACKEND_BASE}/bind-partner/`;
-const CHAT_HISTORY_URL = `${BACKEND_BASE}/chat-history/`;
-const WS_URL = `${WS_BASE}/ws/`;
+const API_URL = `${CLOUD_URL}/analyze-frame/`;
+const LIVENESS_URL = `${CLOUD_URL}/liveness-check/`;
+const AUTH_URL = `${CLOUD_URL}/auth/`;
+const BIND_URL = `${CLOUD_URL}/bind-partner/`;
+const CHAT_HISTORY_URL = `${CLOUD_URL}/chat-history/`;
+const WS_URL = `${WS_URL_BASE}/ws/`;
 
 const welcomeScreen = document.getElementById("welcome-screen");
 const signupScreen = document.getElementById("signup-screen");
