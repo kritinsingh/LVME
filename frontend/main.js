@@ -12,8 +12,8 @@ function createWindow() {
     autoHideMenuBar: true
   });
 
-  // Load the live hosted version for Instant Updates
-  mainWindow.loadURL('https://lvme-1.onrender.com');
+  // Load the index.html from the local folder
+  mainWindow.loadFile('index.html');
   
   // Grant camera/mic permissions automatically
   mainWindow.webContents.session.setPermissionRequestHandler((webContents, permission, callback) => {

@@ -12,9 +12,5 @@
         "cameraUsageDescription": "LVME requires camera access for private video calls and face authentication."
       }
     }
-  },
-  "server": {
-    "url": "https://lvme-1.onrender.com",
-    "cleartext": true
   }
 }
