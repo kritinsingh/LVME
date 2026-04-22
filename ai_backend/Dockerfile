@@ -19,9 +19,6 @@ RUN pip install uvicorn python-multipart
 
 COPY . .
 
-# Copy the frontend folder (which is now inside ai_backend)
-COPY frontend ./frontend
-
 # Expose port (will be overridden by $PORT on cloud hosts like Heroku/Render)
 ENV PORT=8000
 EXPOSE $PORT
