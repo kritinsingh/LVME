@@ -163,9 +163,13 @@ async function initLivenessCamera() {
         });
         livenessCam.srcObject = livenessStream;
         
+        // Force play for mobile WebViews
+        livenessCam.play().catch(err => console.error("Autoplay prevented:", err));
+        
         livenessCam.onloadedmetadata = () => {
-            livenessCanvas.width = livenessCam.videoWidth;
-            livenessCanvas.height = livenessCam.videoHeight;
+            // Android WebViews sometimes have 0 width during this event
+            livenessCanvas.width = livenessCam.videoWidth || 640;
+            livenessCanvas.height = livenessCam.videoHeight || 480;
             checkLiveness(); // Start looping
         };
     } catch (err) {
@@ -179,7 +183,18 @@ async function checkLiveness() {
     if (isLivenessChecking) return;
     
     isLivenessChecking = true;
-    livenessCtx.drawImage(livenessCam, 0, 0, livenessCanvas.width, livenessCanvas.height);
+    
+    try {
+        if (livenessCanvas.width === 0 || livenessCanvas.height === 0) {
+            livenessCanvas.width = livenessCam.videoWidth || 640;
+            livenessCanvas.height = livenessCam.videoHeight || 480;
+        }
+        livenessCtx.drawImage(livenessCam, 0, 0, livenessCanvas.width, livenessCanvas.height);
+    } catch(e) {
+        isLivenessChecking = false;
+        setTimeout(checkLiveness, 400);
+        return;
+    }
     
     livenessCanvas.toBlob(async (blob) => {
         const formData = new FormData();
@@ -845,11 +860,17 @@ async function createPeerConnection(isVideo) {
     peerConnection.ontrack = event => {
         if (isVideo) {
             const remoteVid = document.getElementById("remote-webcam");
-            if (remoteVid) remoteVid.srcObject = event.streams[0];
+            if (remoteVid) {
+                remoteVid.srcObject = event.streams[0];
+                remoteVid.play().catch(e => console.error("Autoplay prevented:", e));
+            }
         } else {
             // we could attach an invisible audio element, or reuse video tag
             const remoteVid = document.getElementById("remote-webcam");
-            if (remoteVid) remoteVid.srcObject = event.streams[0]; 
+            if (remoteVid) {
+                remoteVid.srcObject = event.streams[0]; 
+                remoteVid.play().catch(e => console.error("Autoplay prevented:", e));
+            }
             // the video element plays audio even without video tracks
         }
     };
@@ -860,6 +881,7 @@ async function createPeerConnection(isVideo) {
         
         if (isVideo) {
             video.srcObject = stream;
+            video.play().catch(e => console.error("Autoplay prevented:", e));
             
             // Re-setup background analysis strictly on local video
             setupMediaRecorder(stream);
@@ -995,7 +1017,17 @@ async function captureAndAnalyze() {
     if (isProcessing || isRecordingVideo) return;
     
     isProcessing = true;
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    
+    try {
+        if (canvas.width === 0 || canvas.height === 0) {
+            canvas.width = video.videoWidth || 640;
+            canvas.height = video.videoHeight || 480;
+        }
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    } catch(e) {
+        isProcessing = false;
+        return;
+    }
     
     canvas.toBlob(async (blob) => {
         const formData = new FormData();

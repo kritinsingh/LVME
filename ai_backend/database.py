@@ -3,9 +3,14 @@ from sqlalchemy import create_engine, Column, Integer, String, Float, ForeignKey
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 from datetime import datetime
 
-DATABASE_URL = "sqlite:///./lvme_data.db"
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://lvme_db_user:Qa3u33Slor46rnBZQwLV9JoTingkGUMU@dpg-d7kg66647okc73c0ejtg-a.oregon-postgres.render.com/lvme_db")
 
-engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+# If using Postgres, remove check_same_thread
+if DATABASE_URL.startswith("sqlite"):
+    engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+else:
+    engine = create_engine(DATABASE_URL)
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()

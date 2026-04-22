@@ -1,6 +1,6 @@
 // CONFIGURATION: Set this to your live cloud server URL when deploying!
 // For example: const CLOUD_BACKEND_URL = "my-lvme-backend.onrender.com";
-const CLOUD_BACKEND_URL = null; // Set to null to use localhost
+const CLOUD_BACKEND_URL = "lvme-1.onrender.com"; // Set to null to use localhost
 
 const BACKEND_HOST = CLOUD_BACKEND_URL || (window.location.hostname === '' || window.location.hostname === 'localhost' ? '127.0.0.1' : window.location.hostname);
 const PROTOCOL = CLOUD_BACKEND_URL ? 'https' : 'http';
