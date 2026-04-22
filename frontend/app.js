@@ -1,18 +1,14 @@
-// CONFIGURATION: Set this to your live cloud server URL when deploying!
-// For example: const CLOUD_BACKEND_URL = "my-lvme-backend.onrender.com";
-const CLOUD_BACKEND_URL = "lvme-1.onrender.com"; // Set to null to use localhost
+// Dynamic Configuration
+const isHosted = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1' && window.location.hostname !== '';
+const BACKEND_BASE = isHosted ? window.location.origin : `http://127.0.0.1:8000`;
+const WS_BASE = isHosted ? window.location.origin.replace('http', 'ws') : `ws://127.0.0.1:8000`;
 
-const BACKEND_HOST = CLOUD_BACKEND_URL || (window.location.hostname === '' || window.location.hostname === 'localhost' ? '127.0.0.1' : window.location.hostname);
-const PROTOCOL = CLOUD_BACKEND_URL ? 'https' : 'http';
-const WS_PROTOCOL = CLOUD_BACKEND_URL ? 'wss' : 'ws';
-const PORT_STR = CLOUD_BACKEND_URL ? '' : ':8000';
-
-const API_URL = `${PROTOCOL}://${BACKEND_HOST}${PORT_STR}/analyze-frame/`;
-const LIVENESS_URL = `${PROTOCOL}://${BACKEND_HOST}${PORT_STR}/liveness-check/`;
-const AUTH_URL = `${PROTOCOL}://${BACKEND_HOST}${PORT_STR}/auth/`;
-const BIND_URL = `${PROTOCOL}://${BACKEND_HOST}${PORT_STR}/bind-partner/`;
-const CHAT_HISTORY_URL = `${PROTOCOL}://${BACKEND_HOST}${PORT_STR}/chat-history/`;
-const WS_URL = `${WS_PROTOCOL}://${BACKEND_HOST}${PORT_STR}/ws/`;
+const API_URL = `${BACKEND_BASE}/analyze-frame/`;
+const LIVENESS_URL = `${BACKEND_BASE}/liveness-check/`;
+const AUTH_URL = `${BACKEND_BASE}/auth/`;
+const BIND_URL = `${BACKEND_BASE}/bind-partner/`;
+const CHAT_HISTORY_URL = `${BACKEND_BASE}/chat-history/`;
+const WS_URL = `${WS_BASE}/ws/`;
 
 const welcomeScreen = document.getElementById("welcome-screen");
 const signupScreen = document.getElementById("signup-screen");

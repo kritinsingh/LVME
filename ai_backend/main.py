@@ -1,6 +1,6 @@
 import os
 import shutil
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, UploadFile, StaticFiles
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from video_generator import generate_trailer_video
@@ -51,9 +51,16 @@ class ConnectionManager:
 
 manager = ConnectionManager()
 
-@app.get("/")
-def read_root():
+# Backend Health Check
+@app.get("/api/status")
+def read_status():
     return {"status": "Backend is running", "message": "Welcome to the Couple Memory App API"}
+
+# Serve Frontend Static Files
+# We check if the folder exists (it will on Render)
+frontend_path = os.path.join(os.path.dirname(__file__), "frontend")
+if os.path.exists(frontend_path):
+    app.mount("/", StaticFiles(directory=frontend_path, html=True), name="frontend")
 
 @app.post("/liveness-check/")
 async def liveness_check(file: UploadFile = File(...)):

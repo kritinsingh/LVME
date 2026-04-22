@@ -19,6 +19,10 @@ RUN pip install uvicorn python-multipart
 
 COPY . .
 
+# Copy frontend files into the backend folder for serving
+# This assumes the Docker build is run from the repository root
+COPY frontend ./frontend
+
 # Expose port (will be overridden by $PORT on cloud hosts like Heroku/Render)
 ENV PORT=8000
 EXPOSE $PORT
