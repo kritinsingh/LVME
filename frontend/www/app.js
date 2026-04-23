@@ -149,13 +149,6 @@ startSignupFaceBtn.addEventListener("click", () => {
         return;
     }
     
-    // Check if user already exists
-    if (localStorage.getItem(`lvme_user_${val}`)) {
-        signupError.innerText = "Username is already taken by another face!";
-        signupError.style.display = "block";
-        return;
-    }
-    
     signupError.style.display = "none";
     pendingUsername = val;
     authMode = 'signup';
