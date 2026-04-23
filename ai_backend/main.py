@@ -87,20 +87,45 @@ async def analyze_frame(file: UploadFile = File(...)):
 
 @app.post("/auth/")
 def auth_user(mode: str = Form(...), face_hash: str = Form(...), username: str = Form(""), db: Session = Depends(get_db)):
-    potential_hash = float(face_hash)
+    import math
+    
+    def parse_hash_vector(h: str):
+        """Parse a multi-dimensional face hash like '0.34_0.56_...' into a list of floats."""
+        try:
+            parts = h.split("_")
+            if len(parts) > 1:
+                return [float(p) for p in parts]
+            else:
+                # Legacy single-float hash
+                return [float(h)]
+        except:
+            return None
+    
+    def face_distance(v1, v2):
+        """Euclidean distance between two face hash vectors."""
+        if len(v1) != len(v2):
+            return float('inf')  # incompatible formats can never match
+        return math.sqrt(sum((a - b) ** 2 for a, b in zip(v1, v2)))
+    
+    potential_vec = parse_hash_vector(face_hash)
+    if potential_vec is None:
+        return {"status": "error", "message": "Invalid face data. Please try again."}
+    
     users = db.query(User).all()
     matched_user = None
+    best_distance = float('inf')
+    
+    # Matching threshold: tight enough to avoid false matches, loose enough for same-face variance
+    MATCH_THRESHOLD = 0.06
     
     for u in users:
-        try:
-            stored_val = float(u.face_hash)
-            if abs(stored_val - potential_hash) < 0.12:
-                matched_user = u
-                break
-        except:
-            if u.face_hash == face_hash:
-                matched_user = u
-                break
+        stored_vec = parse_hash_vector(u.face_hash)
+        if stored_vec is None:
+            continue
+        dist = face_distance(stored_vec, potential_vec)
+        if dist < MATCH_THRESHOLD and dist < best_distance:
+            best_distance = dist
+            matched_user = u
 
     if mode == "signup":
         if matched_user:

@@ -110,13 +110,22 @@ backToWelcomeBtn1.addEventListener("click", () => {
 });
 
 backToWelcomeBtn2.addEventListener("click", () => {
+    // FULL reset of liveness and auth state so a different person can try
     isLivenessChecking = false;
+    livenessState = "center";
+    holdStartTime = null;
+    registeredFaceHash = null;
+    activeUsername = null;
+    connectedPartner = null;
+    faceHashSamples = [];
     livenessScreen.classList.remove("active");
     if(livenessStream) livenessStream.getTracks().forEach(t => t.stop());
     welcomeScreen.classList.add("active");
     backToWelcomeBtn2.style.display = "none";
     livenessStatus.style.color = ""; // Reset styling
     livenessStatus.innerText = "Waiting for face...";
+    livenessInstruction.innerHTML = "Look <b>straight at the camera</b> and hold for 3 seconds.";
+    livenessProgress.style.width = "0%";
 });
 
 startSignupFaceBtn.addEventListener("click", () => {
@@ -152,7 +161,25 @@ startSignupFaceBtn.addEventListener("click", () => {
     initLivenessCamera();
 });
 
+// Collect multiple face hash samples for accuracy
+let faceHashSamples = [];
+
+function resetLivenessState() {
+    livenessState = "center";
+    holdStartTime = null;
+    registeredFaceHash = null;
+    faceHashSamples = [];
+    isLivenessChecking = false;
+    livenessInstruction.innerHTML = "Look <b>straight at the camera</b> and hold for 3 seconds.";
+    livenessProgress.style.width = "0%";
+    livenessStatus.innerText = "Waiting for face...";
+    livenessStatus.style.color = "";
+}
+
 async function initLivenessCamera() {
+    // Always reset state when starting a new liveness session
+    resetLivenessState();
+    
     try {
         livenessStream = await navigator.mediaDevices.getUserMedia({
             video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: "user" }
@@ -211,6 +238,26 @@ async function checkLiveness() {
     }, "image/jpeg", 0.5);
 }
 
+function averageFaceHash(samples) {
+    // Each sample is a string like "0.34_0.56_0.12_..."
+    // Parse all into arrays of floats, compute element-wise average, reconstruct string
+    if (samples.length === 0) return null;
+    
+    const parsed = samples.map(s => s.split("_").map(Number));
+    const numDims = parsed[0].length;
+    const avgValues = [];
+    
+    for (let d = 0; d < numDims; d++) {
+        let sum = 0;
+        for (let i = 0; i < parsed.length; i++) {
+            sum += parsed[i][d];
+        }
+        avgValues.push((sum / parsed.length).toFixed(4));
+    }
+    
+    return avgValues.join("_");
+}
+
 async function processLivenessResult(data) {
     if (!data.face_found) {
         holdStartTime = null;
@@ -219,33 +266,11 @@ async function processLivenessResult(data) {
         return;
     }
     
-    // On very first detection frame, verify or register depending on mode
-    if (!registeredFaceHash) {
-        const formData = new FormData();
-        formData.append("mode", authMode);
-        formData.append("face_hash", data.face_hash);
-        if (authMode === "signup") formData.append("username", pendingUsername);
-        
-        try {
-            const res = await fetch(AUTH_URL, { method: "POST", body: formData });
-            const result = await res.json();
-            
-            if (result.status === "error") {
-                livenessStatus.innerText = result.message;
-                livenessStatus.style.color = "red";
-                backToWelcomeBtn2.style.display = "inline-block";
-                return;
-            }
-            
-            registeredFaceHash = result.face_hash;
-            activeUsername = result.username;
-            connectedPartner = result.partner || null;
-            
-            loadMemoriesFromDatabase(registeredFaceHash); 
-        } catch (e) {
-            console.error("Auth error:", e);
-            return;
-        }
+    // Collect face hash samples from EVERY detected frame (for averaging later)
+    if (data.face_hash) {
+        faceHashSamples.push(data.face_hash);
+        // Keep only the last 30 samples to avoid memory buildup
+        if (faceHashSamples.length > 30) faceHashSamples.shift();
     }
     
     // Evaluate Pose vs Required State
@@ -275,7 +300,7 @@ async function processLivenessResult(data) {
     }
 }
 
-function advanceLivenessState() {
+async function advanceLivenessState() {
     holdStartTime = null;
     livenessProgress.style.width = "0%";
     
@@ -287,11 +312,55 @@ function advanceLivenessState() {
         livenessInstruction.innerHTML = "Great! Finally, <b>look to your left</b> for 3 seconds.";
     } else if (livenessState === "left") {
         livenessState = "unlocked";
-        livenessStatus.style.color = "#00ff88";
-        livenessStatus.innerText = `Welcome to your universe, ${activeUsername}!`;
         
         // Stop the liveness feed
         if(livenessStream) livenessStream.getTracks().forEach(t => t.stop());
+        
+        // NOW authenticate using the averaged face hash from all collected samples
+        livenessStatus.innerText = "Verifying identity...";
+        livenessStatus.style.color = "#ffcc00";
+        
+        const finalHash = averageFaceHash(faceHashSamples);
+        
+        if (!finalHash) {
+            livenessStatus.innerText = "Could not read face. Please try again.";
+            livenessStatus.style.color = "red";
+            backToWelcomeBtn2.style.display = "inline-block";
+            return;
+        }
+        
+        const formData = new FormData();
+        formData.append("mode", authMode);
+        formData.append("face_hash", finalHash);
+        if (authMode === "signup") formData.append("username", pendingUsername);
+        
+        try {
+            const res = await fetch(AUTH_URL, { method: "POST", body: formData });
+            const result = await res.json();
+            
+            if (result.status === "error") {
+                livenessStatus.innerText = result.message;
+                livenessStatus.style.color = "red";
+                backToWelcomeBtn2.style.display = "inline-block";
+                return;
+            }
+            
+            registeredFaceHash = result.face_hash;
+            activeUsername = result.username;
+            connectedPartner = result.partner || null;
+            
+            loadMemoriesFromDatabase(registeredFaceHash);
+            
+            livenessStatus.style.color = "#00ff88";
+            livenessStatus.innerText = `Welcome to your universe, ${activeUsername}!`;
+            
+        } catch (e) {
+            console.error("Auth error:", e);
+            livenessStatus.innerText = "Connection error. Please try again.";
+            livenessStatus.style.color = "red";
+            backToWelcomeBtn2.style.display = "inline-block";
+            return;
+        }
         
         // Routing Transition Logic
         setTimeout(() => {

@@ -147,10 +147,50 @@ def analyze_liveness(image_path: str) -> dict:
         elif nose_offset_ratio < -0.15:
             pose = "right"
             
-        # Create a unique mathematical Face Hash to act as secure login token
-        inter_ocular = abs(landmarks[133].x - landmarks[362].x)
-        jaw_width = abs(left_ear.x - right_ear.x)
-        face_hash = str(round(inter_ocular / (jaw_width + 1e-6), 3))
+        # Create a unique multi-dimensional Face Hash to act as secure login token
+        # Use many geometric ratios so different faces produce clearly different hashes
+        eps = 1e-6
+        
+        # Key landmark references
+        left_eye_inner  = landmarks[133]   # inner corner left eye
+        right_eye_inner = landmarks[362]   # inner corner right eye
+        left_eye_outer  = landmarks[33]    # outer corner left eye
+        right_eye_outer = landmarks[263]   # outer corner right eye
+        nose_tip        = landmarks[1]
+        nose_bridge     = landmarks[6]     # top of nose bridge
+        chin            = landmarks[152]
+        forehead        = landmarks[10]    # top of forehead
+        upper_lip       = landmarks[13]    # centre upper lip
+        lower_lip       = landmarks[14]    # centre lower lip
+        left_mouth      = landmarks[61]    # left lip corner
+        right_mouth     = landmarks[291]   # right lip corner
+        left_cheek      = landmarks[234]   # left jaw / tragus
+        right_cheek     = landmarks[454]   # right jaw / tragus
+        left_brow_inner = landmarks[55]
+        right_brow_inner= landmarks[285]
+        left_brow_outer = landmarks[46]
+        right_brow_outer= landmarks[276]
+        
+        # Base measurements
+        jaw_width      = abs(right_cheek.x - left_cheek.x) + eps
+        face_height    = abs(chin.y - forehead.y) + eps
+        inter_ocular   = abs(left_eye_inner.x - right_eye_inner.x) + eps
+        
+        # Compute 12 independent ratios for a high-dimensional face signature
+        r1  = round(inter_ocular / jaw_width, 4)                                                    # eye spacing vs jaw
+        r2  = round(abs(left_eye_outer.x - right_eye_outer.x) / jaw_width, 4)                       # outer eye span vs jaw
+        r3  = round(abs(nose_tip.y - nose_bridge.y) / face_height, 4)                               # nose length vs face height
+        r4  = round(abs(nose_tip.y - upper_lip.y) / face_height, 4)                                 # nose-to-lip vs face height
+        r5  = round(abs(upper_lip.y - lower_lip.y) / face_height, 4)                                # lip thickness vs face height
+        r6  = round(abs(left_mouth.x - right_mouth.x) / jaw_width, 4)                               # mouth width vs jaw
+        r7  = round(abs(left_eye_inner.y - left_brow_inner.y) / face_height, 4)                     # left brow height vs face height
+        r8  = round(abs(right_eye_inner.y - right_brow_inner.y) / face_height, 4)                   # right brow height vs face height
+        r9  = round(abs(forehead.y - nose_bridge.y) / face_height, 4)                               # forehead to nose bridge
+        r10 = round(abs(chin.y - lower_lip.y) / face_height, 4)                                     # chin length vs face height
+        r11 = round(abs(left_brow_outer.x - right_brow_outer.x) / jaw_width, 4)                     # brow span vs jaw
+        r12 = round(abs(nose_tip.x - ((left_cheek.x + right_cheek.x) / 2)) / jaw_width, 4)         # nose centering
+        
+        face_hash = f"{r1}_{r2}_{r3}_{r4}_{r5}_{r6}_{r7}_{r8}_{r9}_{r10}_{r11}_{r12}"
         
         return {
             "face_found": True,
