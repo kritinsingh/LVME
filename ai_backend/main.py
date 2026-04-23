@@ -115,8 +115,8 @@ def auth_user(mode: str = Form(...), face_hash: str = Form(...), username: str =
     matched_user = None
     best_distance = float('inf')
     
-    # Matching threshold: tight enough to avoid false matches, loose enough for same-face variance
-    MATCH_THRESHOLD = 0.06
+    # Matching threshold: with 12 dimensions, same-person variance ~0.07, different-person distance ~0.20+
+    MATCH_THRESHOLD = 0.15
     
     for u in users:
         stored_vec = parse_hash_vector(u.face_hash)
